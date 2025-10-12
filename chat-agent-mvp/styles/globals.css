@@ -1,0 +1,13 @@
+/* styles/globals.css */
+/* Tailwind のベース + 軽い余白調整（UI視認性向上のための最小スタイル） */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html, body {
+  height: 100%;
+}

@@ -1,0 +1,6 @@
+# .gitignore
+node_modules
+.next
+dist
+.env
+.DS_Store
