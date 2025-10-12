@@ -277,7 +277,7 @@ export default function Chat({ onFinish }: { onFinish?: (content: string) => voi
             </div>
           </div>
         )}
-        {loading && <div className="text-xs text-gray-500">Pythonで応答＆ログ保存/音声生成中…</div>}
+        {loading && <div className="text-xs text-gray-500">返事を考えています…</div>}
       </div>
 
       <div className="border-t p-3 flex gap-2 items-center">
