@@ -12,7 +12,7 @@ import os
 # パス設定
 PY_DIR = Path(__file__).resolve().parent
 ROOT_DIR = PY_DIR.parent
-CONV_PATH = ROOT_DIR / "logs" / "conversation.txt"  # ← ここは変更しない（指定どおり）
+CONV_PATH = PY_DIR / "logs" / "conversation.txt"  # ← ここは変更しない（指定どおり）
 LOG_DIR = PY_DIR / "logs"                            # 過去日記は python/logs/ を使用
 
 load_dotenv()

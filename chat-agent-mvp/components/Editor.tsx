@@ -59,7 +59,7 @@ export default function Editor({
 
   return (
     <div className="rounded-2xl border bg-white shadow-sm p-4">
-      <h2 className="text-xl font-semibold">会話内容（編集可能）</h2>
+      <h2 className="text-xl font-semibold">日記（編集可能）</h2>
       <p className="text-xs text-gray-500 mt-1">
         保存すると <code>python/logs/{selectedDate}.txt</code> に上書き保存されます（先頭に
         選択日時を書き込みます）。

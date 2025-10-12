@@ -20,7 +20,7 @@ def append_turn(user_text: str, assistant_text: str) -> None:
         f.write(f"[USER] {user_text}\n")
         f.write(f"[ASSISTANT] {assistant_text}\n")
 
-def dump_with_header(header: str = "会話内容") -> str:
+def dump_with_header(header: str = "日記") -> str:
     """ファイル全文を読み出し、先頭に見出しを付けて返す。存在しない場合は空扱い。"""
     _ensure_dir()
     body = ""
