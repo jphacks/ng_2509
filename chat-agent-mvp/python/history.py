@@ -17,9 +17,8 @@ def append_turn(user_text: str, assistant_text: str) -> None:
     _ensure_dir()
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(LOG_FILE, "a", encoding="utf-8") as f:
-        f.write(f"[{ts}] USER: {user_text}\n")
-        f.write(f"[{ts}] ASSISTANT: {assistant_text}\n")
-        f.write("\n")  # ターン間の空行
+        f.write(f"[USER] {user_text}\n")
+        f.write(f"[ASSISTANT] {assistant_text}\n")
 
 def dump_with_header(header: str = "会話内容") -> str:
     """ファイル全文を読み出し、先頭に見出しを付けて返す。存在しない場合は空扱い。"""
