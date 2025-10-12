@@ -4,39 +4,34 @@ import { spawn } from "node:child_process";
 
 export const runtime = "nodejs";
 
-async function runPython(scriptPath: string, stdinText = "") {
+function runPython(scriptPath: string, args: string[]) {
   const pyCmd = process.platform === "win32" ? "python" : "python3";
-  const py = spawn(pyCmd, [scriptPath], {
+  const py = spawn(pyCmd, [scriptPath, ...args], {
     cwd: process.cwd(),
-    stdio: ["pipe", "pipe", "pipe"],
+    stdio: ["ignore", "pipe", "pipe"],
   });
-
   let out = "";
   let err = "";
-
   py.stdout.on("data", (d) => (out += d.toString()));
   py.stderr.on("data", (d) => (err += d.toString()));
-
-  if (stdinText) {
-    py.stdin.write(stdinText);
-  }
-  py.stdin.end();
-
-  const code: number = await new Promise((resolve) => {
-    py.on("close", (c) => resolve(c ?? 0));
+  return new Promise<{ code: number; out: string; err: string }>((resolve) => {
+    py.on("close", (c) => resolve({ code: c ?? 0, out, err }));
   });
-
-  return { code, out, err };
 }
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
-    const { code, out, err } = await runPython("python/dump_logs.py");
+    const url = new URL(req.url);
+    const date = url.searchParams.get("date") || ""; // YYYY-MM-DD
+    if (!date) {
+      return NextResponse.json({ error: "date is required" }, { status: 400 });
+    }
+
+    const { code, out, err } = await runPython("python/dump_logs.py", ["--date", date]);
     if (code !== 0) {
       return NextResponse.json({ error: err || "dump_logs failed" }, { status: 500 });
     }
-    const data = JSON.parse(out);
-    return NextResponse.json({ content: data?.content ?? "" });
+    return NextResponse.json({ content: out }); // 結合済みテキスト
   } catch (e: any) {
     return NextResponse.json({ error: e?.message ?? "Unexpected error" }, { status: 500 });
   }

@@ -25,7 +25,13 @@ declare global {
 }
 /* ------------------------------------ */
 
-export default function Chat({ onFinish }: { onFinish?: (content: string) => void }) {
+export default function Chat({
+    onFinish,
+    selectedDate, // ← 追加
+  }: {
+    onFinish?: (content: string) => void;
+    selectedDate: string;     // YYYY-MM-DD
+  }) {
   const [messages, setMessages] = useState<Msg[]>([
     { role: "assistant", content: "こんにちは！テキスト入力 or 🎤で話しかけてね。" },
   ]);
@@ -240,18 +246,15 @@ export default function Chat({ onFinish }: { onFinish?: (content: string) => voi
 
     // ログ取得 → 親へ渡してエディタへ切替（親が制御）
     try {
-      const r = await fetch("/api/finish", { method: "POST", cache: "no-store" });
+      const r = await fetch(`/api/finish?date=${encodeURIComponent(selectedDate)}`, {
+        method: "POST",
+        cache: "no-store",
+      });
       const { content } = (await r.json()) as { content?: string };
       const text = content || "（会話ログはまだありません）";
-      if (onFinish) onFinish(text);
-      else setMessages((p) => [...p, { role: "assistant", content: text }]); // 互換
+      onFinish?.(text);
     } catch {
-      if (onFinish) onFinish("会話ログの取得に失敗しました。");
-      else
-        setMessages((p) => [
-          ...p,
-          { role: "assistant", content: "会話ログの取得に失敗しました。" },
-        ]);
+      onFinish?.("会話ログの取得に失敗しました。");
     }
   }
 

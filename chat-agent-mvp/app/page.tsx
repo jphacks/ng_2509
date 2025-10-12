@@ -159,9 +159,12 @@ export default function Page() {
 
         {/* チャット（started 中は常にマウント。エディタ表示中は非表示化） */}
         {started && (
-          <div className={`mt-6 ${editorOpen ? "hidden" : "block"}`}>
-            <Chat onFinish={handleFinishToEditor} />
-          </div>
+        <div className={`mt-6 ${editorOpen ? "hidden" : "block"}`}>
+            <Chat
+            onFinish={handleFinishToEditor}
+            selectedDate={selectedDate}   // ← これを追加
+            />
+        </div>
         )}
 
         {/* エディタ（閉じる→チャット / 保存・削除→初期画面） */}
