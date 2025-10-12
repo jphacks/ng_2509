@@ -35,23 +35,37 @@ export async function POST(req: Request) {
     const { text } = await req.json();
     const input = String(text ?? "");
 
-    // 1) 応答テキストを Python で生成
-    const replyProc = await runPython("python/agent.py", input);
-    if (replyProc.code !== 0) {
+    console.log("1. Received input text:", input); // ① 入力テキストを受け取ったか
+
+    const res = await fetch("http://localhost:8000/chat", { // ← URLを直接記述
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ history_text: input }), 
+    });
+
+    console.log("3. API response status:", res.status, res.statusText); // ③ FastAPIからの応答ステータス
+
+    // APIサーバーがエラーを返した場合の処理
+    if (!res.ok) {
+      const errorText = await res.text(); // JSONではなくまずテキストとしてエラー内容を取得
+      console.error("4. API returned an error:", errorText); // ④ エラー内容をログに出力
       return NextResponse.json(
-        { error: replyProc.err || "agent.py failed" },
-        { status: 500 }
+        { error: "API request failed", detail: errorText },
+        { status: res.status }
       );
     }
 
-    // agent.py は {"reply": "..."} を出力
-    let reply = "（応答解析に失敗しました）";
-    try {
-      const json = JSON.parse(replyProc.out);
-      reply = String(json.reply ?? reply);
-    } catch {
-      reply = replyProc.out?.trim() || reply;
+    // FastAPIからの正常な応答をJSONとして受け取る
+    const apiResponse = await res.json();
+    console.log("5. Parsed API response:", apiResponse); // ⑤ JSONは正しくパースできたか
+
+    const reply = apiResponse.response_text;
+    if (!reply) {
+      console.error("6. 'response_text' key not found in API response!"); // ⑥ 目的のキーは存在したか
+      throw new Error("'response_text' key not found in API response");
     }
+    
+    console.log("7. Extracted reply:", reply); // ⑦ 応答テキストの取り出しに成功
 
     // 2) 応答テキストを Python で音声化 → 一時ファイルに保存
     const tmpOut = path.join(os.tmpdir(), `voice-${Date.now()}.mp3`);
