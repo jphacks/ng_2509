@@ -1,14 +1,17 @@
-// components/Editor.tsx
 "use client";
 
 import { useState } from "react";
 
 export default function Editor({
   initialText,
+  selectedDate,
+  selectedTime,
   onClose,
-  onDone, // <- 追加：保存/削除後に初期画面へ戻す
+  onDone, // 保存/削除後に初期画面へ戻す
 }: {
   initialText: string;
+  selectedDate: string;
+  selectedTime: string;
   onClose?: () => void;
   onDone?: () => void;
 }) {
@@ -24,11 +27,14 @@ export default function Editor({
       const res = await fetch("/api/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: text }),
+        body: JSON.stringify({
+          content: text,
+          date: selectedDate, // YYYY-MM-DD
+          time: selectedTime, // HH:mm
+        }),
       });
       if (!res.ok) throw new Error("保存に失敗しました");
-      // 保存成功 → 初期画面へ戻る
-      onDone?.();
+      onDone?.(); // 成功 → 初期画面へ
     } catch (e) {
       setMessage("保存エラー: " + (e instanceof Error ? e.message : String(e)));
     } finally {
@@ -43,8 +49,7 @@ export default function Editor({
     try {
       const res = await fetch("/api/delete", { method: "POST" });
       if (!res.ok) throw new Error("削除に失敗しました");
-      // 削除（保存しない） → 初期画面へ戻る
-      onDone?.();
+      onDone?.(); // 削除（保存しない）→ 初期画面へ
     } catch (e) {
       setMessage("削除エラー: " + (e instanceof Error ? e.message : String(e)));
     } finally {
@@ -56,7 +61,8 @@ export default function Editor({
     <div className="rounded-2xl border bg-white shadow-sm p-4">
       <h2 className="text-xl font-semibold">会話内容（編集可能）</h2>
       <p className="text-xs text-gray-500 mt-1">
-        保存するとシステム内の <code>python/logs/YYYY-MM-DD.txt</code> に上書き保存されます（同日ファイルは上書き）。
+        保存すると <code>python/logs/{selectedDate}.txt</code> に上書き保存されます（先頭に
+        選択日時を書き込みます）。
       </p>
 
       <textarea
@@ -85,12 +91,12 @@ export default function Editor({
           {deleting ? "削除中..." : "保存しない（削除）"}
         </button>
         {onClose && (
-          <button
+            <button
             onClick={onClose}
             className="rounded-lg px-4 py-2 text-sm font-medium border border-gray-300 hover:bg-gray-50"
-          >
-            閉じる
-          </button>
+            >
+            閉じる（編集をやめる）
+            </button>
         )}
       </div>
 
